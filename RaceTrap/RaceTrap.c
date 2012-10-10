@@ -15,6 +15,7 @@
 #include <math.h>
 #include "graphicsScreen.h"
 #include "StopWatch.h"
+#include "linkedlist.c"
 
 
 typedef struct {

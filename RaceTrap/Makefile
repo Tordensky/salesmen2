@@ -17,7 +17,7 @@ LIB = -L$(RRLIB) -L/usr/X11R6/lib64 -L/usr/X11R6/lib -lX11 -lgraphicsScreen -lSt
 all: RaceTrap
 
 RaceTrap: RaceTrap.c
-	$(CC) $(CFLAGS) RaceTrap.c -o RaceTrap $(INC) $(LIB)
+	$(CC) $(CFLAGS) RaceTrap.c linkedlist.c -o RaceTrap $(INC) $(LIB)
 
 clean:
 	rm -f *~ *.o core* RaceTrap
