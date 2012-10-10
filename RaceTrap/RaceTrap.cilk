@@ -104,7 +104,10 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
     
     RouteDefinition *bestRoute;
     
-    while(stck->size >= 0){
+    bestRoute = Alloc_RouteDefinition(); 
+    bestRoute->length = maxRouteLen;
+    
+    while(stck->size > 0){
         route = (RouteDefinition *)pop(stck);
         
         if (route->nCitiesVisited == nTotalCities){
