@@ -121,14 +121,14 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
             }
                     
         } else {
-            for (int i = route->nCitiesVisited; i < nTotalCities; i++){
+            for (int i = route->nCitiesVisited; i <= nTotalCities; i++){
                 
                 
                 double newLength = route->length + distanceTable[route->path[route->nCitiesVisited-1]][route->path[i]];
                 RouteDefinition *newRoute;
                 
                 // Should this city be added
-                if (newLength <= globalBest)    
+                if (newLength >= globalBest)    
                     continue;
                                 
                 newRoute = Alloc_RouteDefinition();  
