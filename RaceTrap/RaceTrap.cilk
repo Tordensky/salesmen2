@@ -138,10 +138,10 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
                 
             }
         }
-        free(route)
+        free(route);
     }
     
-    return globalBest;
+    return bestRoute;
 
     
     
