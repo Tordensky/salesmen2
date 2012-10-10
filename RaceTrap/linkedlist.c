@@ -1,33 +1,33 @@
 /* Author: Steffen Viken Valvaag <steffenv@cs.uit.no> */
 #include <stdlib.h>
 
-struct listnode;
+struct alistnode;
 
-typedef struct listnode listnode_t;
-struct list;
-typedef struct list list_t;
-struct list_iter;
-typedef struct list_iter list_iter_t;
+typedef struct alistnode alistnode_t;
+struct alist;
+typedef struct alist alist_t;
+struct alist_iter;
+typedef struct alist_iter alist_iter_t;
 
-struct listnode {
-    listnode_t *next;
-    listnode_t *prev;
+struct alistnode {
+    alistnode_t *next;
+    alistnode_t *prev;
     void *elem;
 };
 
-struct list {
-    listnode_t *head;
-    listnode_t *tail;
+struct alist {
+    alistnode_t *head;
+    alistnode_t *tail;
     int size;
 };
 
-struct list_iter {
-    listnode_t *node;
+struct alist_iter {
+    alistnode_t *node;
 };
 
-static listnode_t *newnode(void *elem)
+static alistnode_t *anewnode(void *elem)
 {
-    listnode_t *node = (listnode_t *) malloc(sizeof(listnode_t));
+    alistnode_t *node = (alistnode_t *) malloc(sizeof(alistnode_t));
     if (node == NULL)
 	    exit(1);
     node->next = NULL;
@@ -36,119 +36,119 @@ static listnode_t *newnode(void *elem)
     return node;
 }
 
-list_t *list_create()
+alist_t *alist_create()
 {
-    list_t *list = (list_t *)malloc(sizeof(list_t));
-    if (list == NULL)
+    alist_t *alist = (alist_t *)malloc(sizeof(alist_t));
+    if (alist == NULL)
 	    exit(1);
-    list->head = NULL;
-    list->tail = NULL;
-    list->size = 0;
-    return list;
+    alist->head = NULL;
+    alist->tail = NULL;
+    alist->size = 0;
+    return alist;
 }
 
-void list_destroy(list_t *list)
+void alist_destroy(alist_t *alist)
 {
-    listnode_t *node = list->head;
+    alistnode_t *node = alist->head;
     while (node != NULL) {
-	    listnode_t *tmp = node;
+	    alistnode_t *tmp = node;
 	    node = node->next;
 	    free(tmp);
     }
-    free(list);
+    free(alist);
 }
 
-int list_size(list_t *list)
+int alist_size(alist_t *alist)
 {
-    return list->size;
+    return alist->size;
 }
 
-void list_addfirst(list_t *list, void *elem)
+void alist_addfirst(alist_t *alist, void *elem)
 {
-    listnode_t *node = newnode(elem);
-    if (list->head == NULL) {
-	    list->head = list->tail = node;
+    alistnode_t *node = newnode(elem);
+    if (alist->head == NULL) {
+	    alist->head = alist->tail = node;
     }
     else {
-	    list->head->prev = node;
-	    node->next = list->head;
-	    list->head = node;
+	    alist->head->prev = node;
+	    node->next = alist->head;
+	    alist->head = node;
     }
-    list->size++;
+    alist->size++;
 }
 
-void list_addlast(list_t *list, void *elem)
+void alist_addlast(alist_t *alist, void *elem)
 {
-    listnode_t *node = newnode(elem);
-    if (list->head == NULL) {
-	    list->head = list->tail = node;
+    alistnode_t *node = newnode(elem);
+    if (alist->head == NULL) {
+	    alist->head = alist->tail = node;
     }
     else {
-	    list->tail->next = node;
-	    node->prev = list->tail;
-	    list->tail = node;
+	    alist->tail->next = node;
+	    node->prev = alist->tail;
+	    alist->tail = node;
     }
-    list->size++;
+    alist->size++;
 }
 
-void *list_popfirst(list_t *list)
+void *alist_popfirst(alist_t *alist)
 {
-    if (list->head == NULL) {
+    if (alist->head == NULL) {
 	    exit(1);
     }
     else {
-        void *elem = list->head->elem;
-	    listnode_t *tmp = list->head;
-	    list->head = list->head->next;
-	    if (list->head == NULL) {
-	        list->tail = NULL;
+        void *elem = alist->head->elem;
+	    alistnode_t *tmp = alist->head;
+	    alist->head = alist->head->next;
+	    if (alist->head == NULL) {
+	        alist->tail = NULL;
 	    }
 	    else {
-	        list->head->prev = NULL;
+	        alist->head->prev = NULL;
 	    }
-	    list->size--;
+	    alist->size--;
 	    free(tmp);
 	    return elem;
     }
 }
 
-void *list_poplast(list_t *list)
+void *alist_poplast(alist_t *alist)
 {
-    if (list->tail == NULL) {
+    if (alist->tail == NULL) {
         exit(1);
     }
     else {
-        void *elem = list->tail->elem;
-	    listnode_t *tmp = list->tail;
-	    list->tail = list->tail->prev;
-	    if (list->tail == NULL) {
-	        list->head = NULL;
+        void *elem = alist->tail->elem;
+	    alistnode_t *tmp = alist->tail;
+	    alist->tail = alist->tail->prev;
+	    if (alist->tail == NULL) {
+	        alist->head = NULL;
 	    }
 	    else {
-	        list->tail->next = NULL;
+	        alist->tail->next = NULL;
 	    }
 	    free(tmp);
-	    list->size--;
+	    alist->size--;
 	    return elem;
     }
 }
 
 
-list_iter_t *list_createiter(list_t *list)
+alist_iter_t *alist_createiter(alist_t *alist)
 {
-    list_iter_t *iter = (list_iter_t *) malloc(sizeof(list_iter_t));
+    alist_iter_t *iter = (alist_iter_t *) malloc(sizeof(alist_iter_t));
     if (iter == NULL)
 	    exit(1);
-    iter->node = list->head;
+    iter->node = alist->head;
     return iter;
 }
 
-void list_destroyiter(list_iter_t *iter)
+void alist_destroyiter(alist_iter_t *iter)
 {
     free(iter);
 }
 
-int list_hasnext(list_iter_t *iter)
+int alist_hasnext(alist_iter_t *iter)
 {
     if (iter->node == NULL)
 	    return 0;
@@ -156,7 +156,7 @@ int list_hasnext(list_iter_t *iter)
 	    return 1;
 }
 
-void *list_next(list_iter_t *iter)
+void *alist_next(alist_iter_t *iter)
 {
     if (iter->node == NULL) {
 	    exit(1);
