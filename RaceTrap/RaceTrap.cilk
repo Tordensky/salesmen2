@@ -152,7 +152,7 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
                 
             }
         }
-        free(curr_route);
+        //free(curr_route);
     }
     free(route);
     return bestRoute;
