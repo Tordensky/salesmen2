@@ -105,17 +105,21 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
     RouteDefinition *bestRoute;
     
     bestRoute = Alloc_RouteDefinition(); 
+    
     bestRoute->length = maxRouteLen;
     
+    RouteDefinition *curr_route;
+    curr_route = Alloc_RouteDefinition(); 
+    
     while(stck->size > 0){
-        route = (RouteDefinition *)pop(stck);
+        curr_route = (RouteDefinition *)pop(stck);
         
-        if (route->nCitiesVisited == nTotalCities){
+        if (curr_route->nCitiesVisited == nTotalCities){
             
-            route->length += distanceTable[route->path[route->nCitiesVisited-1]][route->path[0]];
+            curr_route->length += distanceTable[curr_route->path[curr_route->nCitiesVisited-1]][curr_route->path[0]];
             
-            if(route->length < globalBest){
-                bestRoute = route;
+            if(curr_route->length < globalBest){
+                bestRoute = curr_route;
                 globalBest = bestRoute->length;
 
 #ifdef GRAPHICS
@@ -124,10 +128,10 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
             }
                     
         } else {
-            for (int i = route->nCitiesVisited; i < nTotalCities; i++){
+            for (int i = curr_route->nCitiesVisited; i < nTotalCities; i++){
                 
                 
-                double newLength = route->length + distanceTable[route->path[route->nCitiesVisited-1]][route->path[i]];
+                double newLength = curr_route->length + distanceTable[curr_route->path[curr_route->nCitiesVisited-1]][curr_route->path[i]];
                 RouteDefinition *newRoute;
                 
                 // Should this city be added
@@ -136,21 +140,21 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
                                 
                 newRoute = Alloc_RouteDefinition();  
                 
-                memcpy(newRoute->path, route->path, nTotalCities);   // Copy current route from route
+                memcpy(newRoute->path, curr_route->path, nTotalCities);   // Copy current route from route
         
                 // Swaps the position of bag # 'i' and bag # 'nCitiesVisited' from route
-                newRoute->path[route->nCitiesVisited] = route->path[i];
-                newRoute->path[i]              = route->path[route->nCitiesVisited]; 
-                newRoute->nCitiesVisited = route->nCitiesVisited + 1;
+                newRoute->path[curr_route->nCitiesVisited] = curr_route->path[i];
+                newRoute->path[i]              = curr_route->path[curr_route->nCitiesVisited]; 
+                newRoute->nCitiesVisited = curr_route->nCitiesVisited + 1;
                 newRoute->length  = newLength;
                 
                 push(stck, newRoute);
                 
             }
         }
-        free(route);
+        free(curr_route);
     }
-    
+    free(route)
     return bestRoute;
 
     
