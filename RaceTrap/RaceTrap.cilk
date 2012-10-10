@@ -119,6 +119,7 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
             curr_route->length += distanceTable[curr_route->path[curr_route->nCitiesVisited-1]][curr_route->path[0]];
             
             if(curr_route->length < globalBest){
+                free(bestRoute);
                 bestRoute = curr_route;
                 globalBest = bestRoute->length;
 
