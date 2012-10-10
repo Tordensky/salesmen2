@@ -104,7 +104,7 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
     
     RouteDefinition *bestRoute;
     
-    while(stck->size > 0){
+    while(stck->size >= 0){
         route = (RouteDefinition *)pop(stck);
         
         if (route->nCitiesVisited == nTotalCities){
@@ -121,7 +121,7 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
             }
                     
         } else {
-            for (int i = route->nCitiesVisited; i <= nTotalCities; i++){
+            for (int i = route->nCitiesVisited; i < nTotalCities; i++){
                 
                 
                 double newLength = route->length + distanceTable[route->path[route->nCitiesVisited-1]][route->path[i]];
