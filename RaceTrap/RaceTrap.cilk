@@ -319,7 +319,8 @@ int cilk_main (int argc, char **argv)
     
 #ifdef GRAPHICS
         // Show the best route
-    PlotRoute((char *)res->path);           
+    PlotRoute((char *)res->path);
+    free(res);
     sleep(2);
     gs_exit();
 #endif  
