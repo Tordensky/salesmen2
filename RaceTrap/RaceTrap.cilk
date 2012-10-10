@@ -104,13 +104,17 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
     
     RouteDefinition *bestRoute;
     
-    while(stck->size != 0){
+    while(stck->size > 0){
         route = (RouteDefinition *)pop(stck);
+        
         if (route->nCitiesVisited == nTotalCities){
             
             if(route->length < globalBest){
                 bestRoute = route;
                 globalBest = bestRoute->length;
+#ifdef GRAPHICS
+                 PlotRoute((char *)bestRoute->path);
+#endif
             }
                     
         } else {
