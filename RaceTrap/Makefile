@@ -1,7 +1,7 @@
 CC = /opt/cilk/bin/g++
 
 # Remove -DGRAPHICS to compile with no graphic support (e.g. for measurements)
-CFLAGS = -O2 -Wall -g -DGRAPHICS 
+CFLAGS = -O2 -Wall -g #-DGRAPHICS 
 
 # Use this for SDL (change the path to sdl-config to the correct
 # location if you're not running on rocks)
