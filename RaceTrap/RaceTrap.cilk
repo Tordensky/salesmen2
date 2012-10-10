@@ -26,14 +26,14 @@ typedef struct {
 
 typedef struct {
     double        length;     // Length of the current path (distance)
-    unsigned char nPlaced;    // Number of bags currently placed
+    unsigned char nCitiesVisited;    // Number of bags currently placed
     unsigned char path[0];    // Array of vertex/bag numbers in the path (see comment in
                               // Alloc_RouteDefinition())
 } RouteDefinition; 
 
 
-int      nBags = 0;             // Number of grain-bags
-Coord   *bagCoords;             // Coordinates for the grain-bags
+int      nTotalCities = 0;             // Number of grain-bags
+Coord   *cityCoords;             // Coordinates for the grain-bags
 double **distanceTable;         // Table of distances between any two grain-bags
 double   maxRouteLen = 10E100;  // Initial best distance, must be longer than any possible route
 double   globalBest  = 10E100;  // Bounding variable
@@ -41,15 +41,15 @@ double   globalBest  = 10E100;  // Bounding variable
 
 inline RouteDefinition* Alloc_RouteDefinition()
 {
-    if (nBags <= 0) 
+    if (nTotalCities <= 0) 
     {
-        fprintf(stderr, "Error: Alloc_RouteDefinition called with invalid nBags (%d)\n", nBags); 
+        fprintf(stderr, "Error: Alloc_RouteDefinition called with invalid nTotalCities (%d)\n", nTotalCities); 
         exit(-1); 
     }
-        // NB: The +nBags*sizeof.. trick "expands" the path[0] array in RouteDefintion
-        // to a path[nBags] array.
+        // NB: The +nTotalCities*sizeof.. trick "expands" the path[0] array in RouteDefintion
+        // to a path[nTotalCities] array.
     RouteDefinition *def = NULL;  
-    return (RouteDefinition*) malloc(sizeof(RouteDefinition) + nBags * sizeof(def->path[0]));
+    return (RouteDefinition*) malloc(sizeof(RouteDefinition) + nTotalCities * sizeof(def->path[0]));
 }
 
 
@@ -61,17 +61,17 @@ void PlotRoute(char *path)
     int i;
     gs_clear(WHITE);
         // Plot each grain bag
-    for(i = 0; i < nBags; i++)
-        gs_dot(bagCoords[i].x, bagCoords[i].y, 10, RED); 
+    for(i = 0; i < nTotalCities; i++)
+        gs_dot(cityCoords[i].x, cityCoords[i].y, 10, RED); 
     
         // Plot edges in the path
-    for(i = 0; i < nBags-1; i++)
-        gs_line(bagCoords[(int)path[i  ]].x, bagCoords[(int)path[i  ]].y, 
-                bagCoords[(int)path[i+1]].x, bagCoords[(int)path[i+1]].y, RED);    
+    for(i = 0; i < nTotalCities-1; i++)
+        gs_line(cityCoords[(int)path[i  ]].x, cityCoords[(int)path[i  ]].y, 
+                cityCoords[(int)path[i+1]].x, cityCoords[(int)path[i+1]].y, RED);    
     
         // Plot the final edge closing the path
-    gs_line(bagCoords[(int)path[nBags-1]].x, bagCoords[(int)path[nBags-1]].y, 
-            bagCoords[(int)path[0      ]].x, bagCoords[(int)path[0      ]].y, RED);
+    gs_line(cityCoords[(int)path[nTotalCities-1]].x, cityCoords[(int)path[nTotalCities-1]].y, 
+            cityCoords[(int)path[0      ]].x, cityCoords[(int)path[0      ]].y, RED);
     
     gs_update();
 }
@@ -99,10 +99,10 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
     int i;
     RouteDefinition *bestRoute;
     
-    if (route->nPlaced == nBags)
+    if (route->nCitiesVisited == nTotalCities)
     {
             // If all grain bags have been placed we simply add the distance to get back home (closing the loop)
-        route->length += distanceTable[route->path[route->nPlaced-1]][route->path[0]];
+        route->length += distanceTable[route->path[route->nCitiesVisited-1]][route->path[0]];
         return route;
     }
     
@@ -115,13 +115,13 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
     
         // Try a number of permutations:
         // For each 'i', use bag 'i' as the next bag in the route (at
-        // position route->nPlaced). To do this, we copy 'route' to
-        // newRoute and swap the bags in position 'i' and route->nPlaced
+        // position route->nCitiesVisited). To do this, we copy 'route' to
+        // newRoute and swap the bags in position 'i' and route->nCitiesVisited
         // in newRoute.
-    for (i = route->nPlaced; i < nBags; i++)
+    for (i = route->nCitiesVisited; i < nTotalCities; i++)
     {
             // newlength is the current route length + the path to bag number 'i'.
-        double newLength = route->length + distanceTable[route->path[route->nPlaced-1]][route->path[i]];
+        double newLength = route->length + distanceTable[route->path[route->nCitiesVisited-1]][route->path[i]];
         RouteDefinition *newRoute; 
         
             // Before we set up the new branch, check whether the partial path 
@@ -136,12 +136,12 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
             // further for routes starting with this partial route.
         newRoute = Alloc_RouteDefinition();  
         
-        memcpy(newRoute->path, route->path, nBags);   // Copy current route from route
+        memcpy(newRoute->path, route->path, nTotalCities);   // Copy current route from route
         
-            // Swaps the position of bag # 'i' and bag # 'nPlaced' from route
-        newRoute->path[route->nPlaced] = route->path[i];
-        newRoute->path[i]              = route->path[route->nPlaced]; 
-        newRoute->nPlaced = route->nPlaced + 1;
+            // Swaps the position of bag # 'i' and bag # 'nCitiesVisited' from route
+        newRoute->path[route->nCitiesVisited] = route->path[i];
+        newRoute->path[i]              = route->path[route->nCitiesVisited]; 
+        newRoute->nCitiesVisited = route->nCitiesVisited + 1;
         newRoute->length  = newLength;
         
             // Recurse further into this tree and return the shortest path along this permutation
@@ -186,19 +186,19 @@ static void ReadRoute()
     int i,j;
     
         // Read how many bags there are
-    if (fscanf(file, "%d", &nBags) != 1) 
+    if (fscanf(file, "%d", &nTotalCities) != 1) 
     {
         printf("Error: couldn't read number of bags from route definition file.\n");
         exit(-1);
     }
     
         // Allocate array of bag coords. 
-    bagCoords = (Coord*) malloc(nBags * sizeof(Coord)); 
+    cityCoords = (Coord*) malloc(nTotalCities * sizeof(Coord)); 
     
         // Read the coordinates of each grain bag
-    for (i = 0; i < nBags; i++)
+    for (i = 0; i < nTotalCities; i++)
     {
-        if (fscanf(file,"%d %d", &bagCoords[i].x, &bagCoords[i].y) != 2) 
+        if (fscanf(file,"%d %d", &cityCoords[i].x, &cityCoords[i].y) != 2) 
         {
             printf("Error: missing or invalid definition of coordinate %d.\n", i);
             exit(-1);
@@ -206,14 +206,14 @@ static void ReadRoute()
     }
     
         // Allocate distance table 
-    distanceTable = (double**) malloc(nBags * sizeof(double*));
-    for (i = 0; i < nBags; i++)
-        distanceTable[i] = (double*) malloc(nBags * sizeof(double));
+    distanceTable = (double**) malloc(nTotalCities * sizeof(double*));
+    for (i = 0; i < nTotalCities; i++)
+        distanceTable[i] = (double*) malloc(nTotalCities * sizeof(double));
     
         // Compute the distances between each of the grain bags.
-    for (i = 0; i < nBags; i++)	  
-        for (j = 0; j < nBags; j++)	  
-            distanceTable[i][j] = EuclidDist(&bagCoords[i], &bagCoords[j]);
+    for (i = 0; i < nTotalCities; i++)	  
+        for (j = 0; j < nTotalCities; j++)	  
+            distanceTable[i][j] = EuclidDist(&cityCoords[i], &cityCoords[j]);
 }
 
 
@@ -231,7 +231,7 @@ int cilk_main (int argc, char **argv)
     
         // Set up an initial path that goes through each bag in turn. 
     originalRoute = Alloc_RouteDefinition(); 
-    for (i = 0; i < nBags; i++)
+    for (i = 0; i < nTotalCities; i++)
         originalRoute->path[i] = (unsigned char) i;
     
 #ifdef GRAPHICS
@@ -240,7 +240,7 @@ int cilk_main (int argc, char **argv)
 #endif
     
     originalRoute->length = 0.0;
-    originalRoute->nPlaced = 1;
+    originalRoute->nCitiesVisited = 1;
     
     sw_init();
     sw_start();
