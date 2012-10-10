@@ -126,6 +126,8 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
 #ifdef GRAPHICS
                 PlotRoute((char *)bestRoute->path);
 #endif
+            } else {
+                free(curr_route);
             }
                     
         } else {
@@ -136,8 +138,9 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
                 RouteDefinition *newRoute;
                 
                 // Should this city be added
-                if (newLength >= globalBest)    
+                if (newLength >= globalBest){     
                     continue;
+                }
                                 
                 newRoute = Alloc_RouteDefinition();  
                 
