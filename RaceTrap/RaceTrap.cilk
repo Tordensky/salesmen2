@@ -97,6 +97,11 @@ void PlotRoute(char *path)
 RouteDefinition *ShortestRoute(RouteDefinition *route)
 { 
 
+    stack_t* stck;
+    stck = stack_create();
+    
+    
+    
     RouteDefinition *bestRoute;
     
     if (route->nCitiesVisited == nTotalCities)
