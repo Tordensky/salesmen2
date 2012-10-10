@@ -96,7 +96,7 @@ void PlotRoute(char *path)
  */ 
 RouteDefinition *ShortestRoute(RouteDefinition *route)
 { 
-    int i;
+
     RouteDefinition *bestRoute;
     
     if (route->nCitiesVisited == nTotalCities)
@@ -118,7 +118,7 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
         // position route->nCitiesVisited). To do this, we copy 'route' to
         // newRoute and swap the bags in position 'i' and route->nCitiesVisited
         // in newRoute.
-    for (i = route->nCitiesVisited; i < nTotalCities; i++)
+    for (int i = route->nCitiesVisited; i < nTotalCities; i++)
     {
             // newlength is the current route length + the path to bag number 'i'.
         double newLength = route->length + distanceTable[route->path[route->nCitiesVisited-1]][route->path[i]];
