@@ -108,10 +108,13 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
         route = (RouteDefinition *)pop(stck);
         
         if (route->nCitiesVisited == nTotalCities){
+            
             route->length += distanceTable[route->path[route->nCitiesVisited-1]][route->path[0]];
+            
             if(route->length < globalBest){
                 bestRoute = route;
                 globalBest = bestRoute->length;
+
 #ifdef GRAPHICS
                 PlotRoute((char *)bestRoute->path);
 #endif
@@ -125,7 +128,7 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
                 RouteDefinition *newRoute;
                 
                 // Should this city be added
-                if (newLength >= globalBest)    
+                if (newLength <= globalBest)    
                     continue;
                                 
                 newRoute = Alloc_RouteDefinition();  
