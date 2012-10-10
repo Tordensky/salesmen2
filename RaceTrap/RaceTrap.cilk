@@ -155,8 +155,9 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
                 push(stck, newRoute);
                 
             }
+            free(curr_route);
         }
-        free(curr_route);
+        
     }
     free(route);
     return bestRoute;
