@@ -65,7 +65,7 @@ int alist_size(alist_t *alist)
 
 void alist_addfirst(alist_t *alist, void *elem)
 {
-    alistnode_t *node = newnode(elem);
+    alistnode_t *node = anewnode(elem);
     if (alist->head == NULL) {
 	    alist->head = alist->tail = node;
     }
@@ -79,7 +79,7 @@ void alist_addfirst(alist_t *alist, void *elem)
 
 void alist_addlast(alist_t *alist, void *elem)
 {
-    alistnode_t *node = newnode(elem);
+    alistnode_t *node = anewnode(elem);
     if (alist->head == NULL) {
 	    alist->head = alist->tail = node;
     }
