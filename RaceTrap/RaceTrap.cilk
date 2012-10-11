@@ -105,10 +105,8 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
     bestRoute = Alloc_RouteDefinition(); 
 
     bestRoute->length = maxRouteLen;
-    printf("Best %f lengt\n", bestRoute->length);
 
     cilk_for(int p = route->nCitiesVisited; p < nTotalCities; p++){
-        printf("Best %f lengt\n", bestRoute->length);
         
         stack_t* stck;
         stck = stack_create();
@@ -153,8 +151,7 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
     #endif  
                     
                 } else {
-                    printf("Not best %d\n", p);
-                    //free(curr_route);
+                    free(curr_route);
                 }
                 pthread_mutex_unlock(&mut);
                 
@@ -182,16 +179,14 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
                     push(stck, newRoute);
                     
                 }
-                //free(curr_route);
+                free(curr_route);
             }
             
         }
         
-    printf("Donw with while%d\n", p);    
     }
     
-    printf("Returns\n");
-    //free(route);
+    free(route);
     return bestRoute;
 
     
