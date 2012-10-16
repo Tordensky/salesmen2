@@ -14,10 +14,13 @@ LIB = -L$(RRLIB) -L/usr/X11R6/lib64 -L/usr/X11R6/lib -lX11 -lgraphicsScreen -lSt
 #INC = -I$(RRLIB) 
 #LIB = -L$(RRLIB) -L/usr/X11R6/lib64 -L/usr/X11R6/lib -lX11 -lgraphicsScreen -L../TinyPTC-X11-0.7.3 -ltinyptc -lStopWatch -lm
 
-all: RaceTrap
+all: RaceTrap Working
 
 RaceTrap: RaceTrap.cilk 
 	$(CC) $(CFLAGS) RaceTrap.cilk stack.c -o RaceTrap $(INC) $(LIB)
+	
+Working: RaceTrap.cilk 
+	$(CC) $(CFLAGS) working.cilk stack.c -o working $(INC) $(LIB)
 
 clean:
 	rm -f *~ *.o core* RaceTrap

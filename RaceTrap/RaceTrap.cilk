@@ -17,6 +17,7 @@
 #include "graphicsScreen.h"
 #include "StopWatch.h"
 #include "stack.c"
+#include <pthread.h>
 
 
 typedef struct {
@@ -31,6 +32,9 @@ typedef struct {
                               // Alloc_RouteDefinition())
 } RouteDefinition; 
 
+
+pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
+RouteDefinition *bestRoute;
 
 int      nTotalCities = 0;             // Number of grain-bags
 Coord   *cityCoords;             // Coordinates for the grain-bags
@@ -96,69 +100,92 @@ void PlotRoute(char *path)
  */ 
 RouteDefinition *ShortestRoute(RouteDefinition *route)
 { 
+    
 
-    stack_t* stck;
-    stck = stack_create();
-    
-    push(stck, route);
-    
-    RouteDefinition *bestRoute;
-    
     bestRoute = Alloc_RouteDefinition(); 
-    
-    bestRoute->length = maxRouteLen;
-    
-    RouteDefinition *curr_route;
-    curr_route = Alloc_RouteDefinition(); 
-    
-    while(stck->size > 0){
-        curr_route = (RouteDefinition *)pop(stck);
-        
-        if (curr_route->nCitiesVisited == nTotalCities){
-            
-            curr_route->length += distanceTable[curr_route->path[curr_route->nCitiesVisited-1]][curr_route->path[0]];
-            
-            if(curr_route->length < globalBest){
-                free(bestRoute);
-                bestRoute = curr_route;
-                globalBest = bestRoute->length;
 
-#ifdef GRAPHICS
-                PlotRoute((char *)bestRoute->path);
-#endif
+    bestRoute->length = maxRouteLen;
+
+    cilk_for(int p = route->nCitiesVisited; p < nTotalCities; p++){
+        
+        stack_t* stck;
+        stck = stack_create();
+        
+        RouteDefinition *newRoute;
+        newRoute = Alloc_RouteDefinition();  
+        
+        double newLength = route->length + distanceTable[route->path[route->nCitiesVisited-1]][route->path[p]];
+        
+        memcpy(newRoute->path, route->path, nTotalCities);   // Copy current route from route
+            
+        // Swaps the position of bag # 'i' and bag # 'nCitiesVisited' from route
+        newRoute->path[route->nCitiesVisited] = route->path[p];
+        newRoute->path[p]              = route->path[route->nCitiesVisited]; 
+        newRoute->nCitiesVisited = route->nCitiesVisited + 1;
+        newRoute->length  = newLength;
+        
+        push(stck, newRoute);
+
+        RouteDefinition *curr_route;
+        curr_route = Alloc_RouteDefinition();
+        
+        while(stck->size > 0){
+            curr_route = (RouteDefinition *)pop(stck);
+            
+            if (curr_route->nCitiesVisited == nTotalCities){
+                
+                curr_route->length += distanceTable[curr_route->path[curr_route->nCitiesVisited-1]][curr_route->path[0]];
+
+                pthread_mutex_lock(&mut);
+
+                if(curr_route->length < globalBest){
+
+                    free(bestRoute);
+                    
+                    bestRoute = curr_route;
+
+                    globalBest = bestRoute->length;
+                    
+    #ifdef GRAPHICS
+                    PlotRoute((char *)bestRoute->path);
+    #endif  
+                    
+                } else {
+                    free(curr_route);
+                }
+                pthread_mutex_unlock(&mut);
+                
+                        
             } else {
+                for (int i = curr_route->nCitiesVisited; i < nTotalCities; i++){
+                    
+                    newLength = curr_route->length + distanceTable[curr_route->path[curr_route->nCitiesVisited-1]][curr_route->path[i]];
+                    
+                    // Should this city be added
+                    if (newLength >= globalBest){     
+                        continue;
+                    }
+                                    
+                    newRoute = Alloc_RouteDefinition();  
+                    
+                    memcpy(newRoute->path, curr_route->path, nTotalCities);   // Copy current route from route
+            
+                    // Swaps the position of bag # 'i' and bag # 'nCitiesVisited' from route
+                    newRoute->path[curr_route->nCitiesVisited] = curr_route->path[i];
+                    newRoute->path[i]              = curr_route->path[curr_route->nCitiesVisited]; 
+                    newRoute->nCitiesVisited = curr_route->nCitiesVisited + 1;
+                    newRoute->length  = newLength;
+                    
+                    push(stck, newRoute);
+                    
+                }
                 free(curr_route);
             }
-                    
-        } else {
-            for (int i = curr_route->nCitiesVisited; i < nTotalCities; i++){
-                
-                
-                double newLength = curr_route->length + distanceTable[curr_route->path[curr_route->nCitiesVisited-1]][curr_route->path[i]];
-                RouteDefinition *newRoute;
-                
-                // Should this city be added
-                if (newLength >= globalBest){     
-                    continue;
-                }
-                                
-                newRoute = Alloc_RouteDefinition();  
-                
-                memcpy(newRoute->path, curr_route->path, nTotalCities);   // Copy current route from route
-        
-                // Swaps the position of bag # 'i' and bag # 'nCitiesVisited' from route
-                newRoute->path[curr_route->nCitiesVisited] = curr_route->path[i];
-                newRoute->path[i]              = curr_route->path[curr_route->nCitiesVisited]; 
-                newRoute->nCitiesVisited = curr_route->nCitiesVisited + 1;
-                newRoute->length  = newLength;
-                
-                push(stck, newRoute);
-                
-            }
-            free(curr_route);
+            
         }
         
     }
+    
     free(route);
     
     return bestRoute;
