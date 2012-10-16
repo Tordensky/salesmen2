@@ -160,85 +160,8 @@ RouteDefinition *ShortestRoute(RouteDefinition *route)
         
     }
     free(route);
+    
     return bestRoute;
-
-    
-    
-    
-//     // END OF NEW IMPLEMENTATION
-//     
-//     RouteDefinition *bestRoute;
-//     
-//     if (route->nCitiesVisited == nTotalCities)
-//     {
-//             // If all grain bags have been placed we simply add the distance to get back home (closing the loop)
-//         route->length += distanceTable[route->path[route->nCitiesVisited-1]][route->path[0]];
-//         return route;
-//     }
-//     
-//         // Provide an initial subtree that will be replaced with a better
-//         // solution. We set the length to something that will be longer
-//         // than any possible path to make sure that it will be replaced with
-//         // the first possible solution.
-//     bestRoute = Alloc_RouteDefinition(); 
-//     bestRoute->length = maxRouteLen;
-//     
-//         // Try a number of permutations:
-//         // For each 'i', use bag 'i' as the next bag in the route (at
-//         // position route->nCitiesVisited). To do this, we copy 'route' to
-//         // newRoute and swap the bags in position 'i' and route->nCitiesVisited
-//         // in newRoute.
-//     for (int i = route->nCitiesVisited; i < nTotalCities; i++)
-//     {
-//             // newlength is the current route length + the path to bag number 'i'.
-//         double newLength = route->length + distanceTable[route->path[route->nCitiesVisited-1]][route->path[i]];
-//         RouteDefinition *newRoute; 
-//         
-//             // Before we set up the new branch, check whether the partial path 
-//             // that we construct is longer than the current best complete route. 
-//             // There is no point in branching along that path if it is longer, as 
-//             // the total path will never be the shortest path. 
-//         if (newLength >= globalBest)
-//             continue;  // New path was longer, try another
-//         
-//             // The new partial route is shorter than the currently
-//             // best known complete route, so it's a candidate. We search
-//             // further for routes starting with this partial route.
-//         newRoute = Alloc_RouteDefinition();  
-//         
-//         memcpy(newRoute->path, route->path, nTotalCities);   // Copy current route from route
-//         
-//             // Swaps the position of bag # 'i' and bag # 'nCitiesVisited' from route
-//         newRoute->path[route->nCitiesVisited] = route->path[i];
-//         newRoute->path[i]              = route->path[route->nCitiesVisited]; 
-//         newRoute->nCitiesVisited = route->nCitiesVisited + 1;
-//         newRoute->length  = newLength;
-//         
-//             // Recurse further into this tree and return the shortest path along this permutation
-//         newRoute = ShortestRoute(newRoute);
-//         
-//         if (newRoute->length < bestRoute->length) 
-//         { 
-//                 // Found a new best route, free the old one and replace with the new one
-//             free(bestRoute);
-//             bestRoute = newRoute; 
-//             if (bestRoute->length < globalBest)
-//             {
-//                 globalBest = bestRoute->length;
-// #ifdef GRAPHICS
-//                 PlotRoute((char *)bestRoute->path);
-// #endif
-//             }
-//         }
-//         else 
-//         {
-//                 // The new route was longer than the current best solution. 
-//             free(newRoute);
-//         }
-//     }
-//     free(route);
-//     
-//    return bestRoute;
 }
 
     // In the desert, the shortest route is a straight line :)
