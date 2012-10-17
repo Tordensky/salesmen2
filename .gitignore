@@ -11,5 +11,8 @@
 *.la
 *.a
 *~
-
+RaceTrap/iterative
+RaceTrap/RaceTrap
+RaceTrap/precode
+RaceTrap/working
 
