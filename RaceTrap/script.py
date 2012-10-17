@@ -24,17 +24,18 @@ def change_number_of_cities(newNum):
 	except:
 		print "Error while trying to change number of cities"
 
-MIN_NUM_CITIES = 8
+MIN_NUM_CITIES = 10
 MAX_NUM_CITIES = 16
 
 MIN_NUM_WORKERS = 1
 MAX_NUM_WORKERS = 8
 
-NUM_RUNS = 10
+NUM_RUNS = 5
 
-FILE_NAMES = ["RaceTrap", "working"]
+FILE_NAMES = ["RaceTrap", "precode", "iterative"]
+NOT_CILK = ["precode", "iterative"]
 
-f = open("results.txt", "w+")
+f = open("secound_results.txt", "w+")
 
 f.write("FILENAME, NUM_CITIES, NUM_WORKERS, RUNTIME\n")
 
@@ -52,10 +53,14 @@ for file in FILE_NAMES:
 			avg = []
 			
 			print "Filename", file, "\tCities: ", curr_num_cities, "\tWorkers ", curr_num_workers
+			
 			for run in range(NUM_RUNS):
 				
+				if file in NOT_CILK:
+					output = os.popen("./" + file).read()
+				else:
+					output = os.popen("./" + file + " -cilk_set_worker_count=" + str(curr_num_workers)).read()
 				
-				output = os.popen("./" + file + " -cilk_set_worker_count=" + str(curr_num_workers)).read()
 				output = StringIO.StringIO(output)
 				
 				x =  output.readline().split(" ")
@@ -82,5 +87,8 @@ for file in FILE_NAMES:
 			print "AVG: ", avg_runtime
 			results = "%s, %d, %d, %d \n" % (file, curr_num_cities, curr_num_workers, avg_runtime)
 			f.write(results)
+			if file in NOT_CILK:
+				print "not cilk"
+				break
 f.close()
 		
